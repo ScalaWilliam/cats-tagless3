@@ -30,43 +30,43 @@ trait SemigroupalK[Alg[_[_]]] extends Serializable {
 }
 
 object SemigroupalK extends SemigroupalKInstances {
-  private[this] val _1k = FunctionK.liftFunction[Tuple2K[Id, Id, *], Id](_.first)
-  private[this] val _2k = FunctionK.liftFunction[Tuple2K[Id, Id, *], Id](_.second)
+  private[this] val _1k = null //FunctionK.liftFunction[Tuple2K[Id, Id, *], Id](_.first)
+  private[this] val _2k = null //FunctionK.liftFunction[Tuple2K[Id, Id, *], Id](_.second)
 
-  def firstK[F[_], G[_]]: Tuple2K[F, G, *] ~> F = _1k.asInstanceOf[Tuple2K[F, G, *] ~> F]
-  def secondK[F[_], G[_]]: Tuple2K[F, G, *] ~> G = _2k.asInstanceOf[Tuple2K[F, G, *] ~> G]
+  def firstK[F[_], G[_]]: ([W] =>> Tuple2K[F, G, W]) ~> F = null //_1k.asInstanceOf[Tuple2K[F, G, *] ~> F]
+  def secondK[F[_], G[_]]: ([W] =>> Tuple2K[F, G, W]) ~> G = null //_2k.asInstanceOf[Tuple2K[F, G, *] ~> G]
 
-  implicit def catsTaglessSemigroupalKForEitherK[F[_], A]: SemigroupalK[EitherK[F, *[_], A]] =
+  implicit def catsTaglessSemigroupalKForEitherK[F[_], A]: SemigroupalK[[W[_]] =>> EitherK[F, W[_], A]] =
     InvariantK.catsTaglessApplyKForEitherK[F, A]
 
-  implicit def catsTaglessSemigroupalKForEitherT[A, B]: SemigroupalK[EitherT[*[_], A, B]] =
+  implicit def catsTaglessSemigroupalKForEitherT[A, B]: SemigroupalK[[W[_]] =>> EitherT[W[_], A, B]] =
     InvariantK.catsTaglessApplyKForEitherT[A, B]
 
-  implicit def catsTaglessSemigroupalKForFunc[A, B]: SemigroupalK[Func[*[_], A, B]] =
+  implicit def catsTaglessSemigroupalKForFunc[A, B]: SemigroupalK[[W[_]] =>> Func[W[_], A, B]] =
     InvariantK.catsTaglessApplyKForFunc[A, B]
 
-  implicit def catsTaglessSemigroupalKForIdT[A]: SemigroupalK[IdT[*[_], A]] =
+  implicit def catsTaglessSemigroupalKForIdT[A]: SemigroupalK[[W[_]] =>> IdT[W[_], A]] =
     InvariantK.catsTaglessApplyKForIdT[A]
 
-  implicit def catsTaglessSemigroupalKForIorT[A, B]: SemigroupalK[IorT[*[_], A, B]] =
+  implicit def catsTaglessSemigroupalKForIorT[A, B]: SemigroupalK[[W[_]] =>> IorT[W[_], A, B]] =
     InvariantK.catsTaglessApplyKForIorT[A, B]
 
-  implicit def catsTaglessSemigroupalKForKleisli[A, B]: SemigroupalK[Kleisli[*[_], A, B]] =
+  implicit def catsTaglessSemigroupalKForKleisli[A, B]: SemigroupalK[[W[_]] =>> Kleisli[W[_], A, B]] =
     InvariantK.catsTaglessApplyKForKleisli[A, B]
 
-  implicit def catsTaglessSemigroupalKForOptionT[A]: SemigroupalK[OptionT[*[_], A]] =
+  implicit def catsTaglessSemigroupalKForOptionT[A]: SemigroupalK[[W[_]] =>> OptionT[W[_], A]] =
     InvariantK.catsTaglessApplyKForOptionT[A]
 
-  implicit def catsTaglessSemigroupalKForWriterT[A, B]: SemigroupalK[WriterT[*[_], A, B]] =
+  implicit def catsTaglessSemigroupalKForWriterT[A, B]: SemigroupalK[[W[_]] =>> WriterT[W[_], A, B]] =
     InvariantK.catsTaglessApplyKForWriterT[A, B]
 
-  implicit def catsTaglessSemigroupalKForOneAnd[A: Semigroup]: SemigroupalK[OneAnd[*[_], A]] =
+  implicit def catsTaglessSemigroupalKForOneAnd[A: Semigroup]: SemigroupalK[[W[_]] =>> OneAnd[W[_], A]] =
     InvariantK.catsTaglessApplyKForOneAnd[A]
 
-  implicit def catsTaglessSemigroupalKForTuple2K1[G[_]: SemigroupK, A]: SemigroupalK[Tuple2K[*[_], G, A]] =
+  implicit def catsTaglessSemigroupalKForTuple2K1[G[_]: SemigroupK, A]: SemigroupalK[[W[_]] =>> Tuple2K[W[_], G, A]] =
     InvariantK.catsTaglessApplyKForTuple2K1[G, A]
 
-  implicit def catsTaglessSemigroupalKForTuple2K2[F[_]: SemigroupK, A]: SemigroupalK[Tuple2K[F, *[_], A]] =
+  implicit def catsTaglessSemigroupalKForTuple2K2[F[_]: SemigroupK, A]: SemigroupalK[[W[_]] =>> Tuple2K[F, W[_], A]] =
     InvariantK.catsTaglessApplyKForTuple2K2[F, A]
 
   // =======================

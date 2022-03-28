@@ -84,8 +84,8 @@ object Aspect {
     type Codomain[F[_], G[_], A] = Weave[F, Trivial, G, A]
     type Function[F[_], G[_], A] = Weave[F, G, G, A]
 
-    def instrumentationK[F[_], Dom[_], Cod[_]]: Weave[F, Dom, Cod, *] ~> Instrumentation[F, *] =
-      λ[Aspect.Weave[F, Dom, Cod, *] ~> Instrumentation[F, *]](_.instrumentation)
+    def instrumentationK[F[_], Dom[_], Cod[_]]: ([V] =>> Weave[F, Dom, Cod, V]) ~> ([W] =>> Instrumentation[F, W]) = ???
+//      λ[Aspect.Weave[F, Dom, Cod, *] ~> Instrumentation[F, *]](_.instrumentation)
   }
 
   /** An [[Aspect.Advice]] represents the effect of a particular [[Aspect]] on a single value (the `target`). It

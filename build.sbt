@@ -42,6 +42,7 @@ val kindProjectorVersion = "0.13.2"
 val paradiseVersion = "2.1.1"
 val scalaCheckVersion = "1.15.4"
 
+ThisBuild / scalacOptions += "-language:implicitConversions"
 val macroSettings = List(
   libraryDependencies ++= List(
     "org.scala-lang" % "scala3-compiler_3" % "3.1.0"
