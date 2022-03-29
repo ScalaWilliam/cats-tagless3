@@ -3,7 +3,7 @@ addCommandAlias("validateJS", "all testsJS/test")
 addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
 addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll")
 
-val Scala311 = "3.1.0"
+val Scala311 = "3.1.1"
 val Java8 = JavaSpec.temurin("8")
 
 val gitRepo = "git@github.com:typelevel/cats-tagless.git"
