@@ -29,7 +29,7 @@ class autoApply extends StaticAnnotation {
 private[tagless] class autoApplyMacros(override val c: whitebox.Context) extends MacroUtils {
   import c.universe._
 
-  private def generateApplyFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateApplyFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("applyFor" + algebraName),
       typeParams,

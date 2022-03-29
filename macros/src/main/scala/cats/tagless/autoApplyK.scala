@@ -31,7 +31,7 @@ private[tagless] class autoApplyKMacros(override val c: whitebox.Context)
     with CovariantKMethodsGenerator {
   import c.universe._
 
-  private def generateApplyKFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateApplyKFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("applyKFor" + algebraName),
       typeParams,

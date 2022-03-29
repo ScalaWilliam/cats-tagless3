@@ -27,7 +27,7 @@ class finalAlg extends StaticAnnotation {
 private[tagless] class finalAlgMacros(override val c: whitebox.Context) extends MacroUtils {
   import c.universe._
 
-  private def generateApply(algebraType: Tree, tparams: Seq[TypeDef]) =
+  private def generateApply(algebraType: Tree, tparams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     q"def apply[..$tparams](implicit inst: $algebraType): $algebraType = inst"
 
   def inst(annottees: c.Tree*): c.Tree =

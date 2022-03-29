@@ -30,7 +30,7 @@ private[tagless] class autoProfunctorMacros(override val c: whitebox.Context) ex
 
   private def generateProfunctorFor(
       algebraName: String
-  )(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  )(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("profunctorFor" + algebraName),
       typeParams,

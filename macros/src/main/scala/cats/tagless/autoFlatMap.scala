@@ -29,7 +29,7 @@ class autoFlatMap extends StaticAnnotation {
 private[tagless] class autoFlatMapMacros(override val c: whitebox.Context) extends MacroUtils {
   import c.universe._
 
-  private def generateFlatMapFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateFlatMapFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("flatMapFor" + algebraName),
       typeParams,

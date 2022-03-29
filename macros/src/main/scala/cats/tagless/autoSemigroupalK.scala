@@ -29,7 +29,7 @@ class autoSemigroupalK extends StaticAnnotation {
 private[tagless] class autoSemigroupalKMacros(override val c: whitebox.Context) extends MacroUtils {
   import c.universe._
 
-  private def generateSemigroupalKFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateSemigroupalKFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("semigroupalKFor" + algebraName),
       typeParams,

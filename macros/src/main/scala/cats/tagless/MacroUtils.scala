@@ -23,7 +23,7 @@ abstract private[tagless] class MacroUtils {
 
   import c.universe._
 
-  class TypeDefinition(val defn: ClassDef, maybeCompanion: Option[ModuleDef]) {
+  class TypeDefinition(val defn: ClassDef, maybeCompanion: _root_.scala.Option[ModuleDef]) {
     val name = defn.name
     val tparams = defn.tparams
     val impl = defn.impl
@@ -63,9 +63,9 @@ abstract private[tagless] class MacroUtils {
 
   object TypeDefinition {
     object FromAnnottees {
-      def unapply(arg: Seq[c.Tree]): Option[TypeDefinition] = arg match {
-        case Seq(t: ClassDef, companion: ModuleDef) => Some(new TypeDefinition(t, Some(companion)))
-        case Seq(t: ClassDef) => Some(new TypeDefinition(t, None))
+      def unapply(arg: Seq[c.Tree]): _root_.scala.Option[TypeDefinition] = arg match {
+        case _root_.scala.collection.immutable.Seq(t: ClassDef, companion: ModuleDef) => Some(new TypeDefinition(t, Some(companion)))
+        case _root_.scala.collection.immutable.Seq(t: ClassDef) => Some(new TypeDefinition(t, None))
         case _ => None
       }
     }
@@ -86,7 +86,7 @@ abstract private[tagless] class MacroUtils {
     final def typeName = cls.ident
     final def name = cls.name.decodedName.toString
 
-    def extraTypeParams: Seq[TypeDef]
+    def extratypeParams: _root_.scala.collection.immutable.Seq[TypeDef]
 
     protected def typeLambdaVaryingEffect: Tree
     final def forVaryingEffectType(gen: (Tree, Seq[TypeDef]) => Tree) =
@@ -112,9 +112,9 @@ abstract private[tagless] class MacroUtils {
         override val cls: TypeDefinition,
         effectType: TypeDef,
         effectTypeArity: Int,
-        override val extraTypeParams: Seq[TypeDef]
+        override val extratypeParams: _root_.scala.collection.immutable.Seq[TypeDef]
     ) extends AlgDefn(1) {
-      private def tArgs(effTpeName: TypeName): List[Ident] = cls.tparams.map {
+      private def tArgs(effTpeName: TypeName): _root_.scala.collection.immutable.List[Ident] = cls.tparams.map {
         case `effectType` => Ident(effTpeName)
         case tp => Ident(tp.name)
       }
@@ -147,7 +147,7 @@ abstract private[tagless] class MacroUtils {
         override val cls: TypeDefinition,
         effectType1: (TypeDef, Int),
         effectType2: (TypeDef, Int),
-        override val extraTypeParams: Seq[TypeDef]
+        override val extratypeParams: _root_.scala.collection.immutable.Seq[TypeDef]
     ) extends AlgDefn(2) {
       private def tArgs(effTpeName1: TypeName, effTpeName2: TypeName): List[Ident] = cls.tparams.map(tp =>
         if (tp == effectType1._1) Ident(effTpeName1)
@@ -273,8 +273,8 @@ abstract private[tagless] class MacroUtils {
   def createFreshTypeParam(name: String, arity: Int): TypeDef = createTypeParam(c.freshName(name), arity)
 
   def tArgs(tparam: TypeDef): Ident = Ident(tparam.name)
-  def tArgs(tparam1: TypeDef, tparam2: TypeDef): List[Ident] = List(tArgs(tparam1), tArgs(tparam2))
-  def tArgs(tparams: List[TypeDef]): List[Ident] = tparams.map(tArgs)
+  def tArgs(tparam1: TypeDef, tparam2: TypeDef): _root_.scala.collection.immutable.List[Ident] = List(tArgs(tparam1), tArgs(tparam2))
+  def tArgs(tparams: _root_.scala.collection.immutable.List[TypeDef]): _root_.scala.collection.immutable.List[Ident] = tparams.map(tArgs)
 
   def arguments(params: Seq[Tree]): Seq[Tree] =
     params.collect {
@@ -287,7 +287,7 @@ abstract private[tagless] class MacroUtils {
   def argumentLists(paramLists: Seq[Seq[Tree]]): Seq[Seq[Tree]] =
     paramLists.map(arguments)
 
-  def typeClassInstance(name: TermName, typeParams: Seq[TypeDef], resultType: Tree, rhs: Tree): Tree =
+  def typeClassInstance(name: TermName, typeParams: _root_.scala.collection.immutable.Seq[TypeDef], resultType: Tree, rhs: Tree): Tree =
     if (typeParams.isEmpty) q"implicit val $name: $resultType = $rhs"
     else q"implicit def $name[..$typeParams]: $resultType = $rhs"
 

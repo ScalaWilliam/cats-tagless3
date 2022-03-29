@@ -29,7 +29,7 @@ class autoContravariantK(autoDerivation: Boolean = true) extends StaticAnnotatio
 private[tagless] class autoContravariantKMacros(override val c: whitebox.Context) extends MacroUtils {
   import c.universe._
 
-  private def generateContravariantKFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateContravariantKFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("contravariantKFor" + algebraName),
       typeParams,

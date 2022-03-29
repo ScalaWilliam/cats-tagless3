@@ -31,7 +31,7 @@ private[tagless] class autoFunctorKMacros(override val c: whitebox.Context)
     with CovariantKMethodsGenerator {
   import c.universe._
 
-  private def generateFunctorKFor(algebraName: String)(algebraType: Tree, typeParams: Seq[TypeDef]) =
+  private def generateFunctorKFor(algebraName: String)(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) =
     typeClassInstance(
       TermName("functorKFor" + algebraName),
       typeParams,
@@ -83,7 +83,7 @@ private[tagless] trait CovariantKMethodsGenerator { self: MacroUtils =>
   def generateAutoDerive(
       algebraTypeOf: TypeDef => TypTree,
       algebraName: String
-  )(algebraType: Tree, typeParams: Seq[TypeDef]) = {
+  )(algebraType: Tree, typeParams: _root_.scala.collection.immutable.Seq[TypeDef]) = {
     val _ = algebraType
     val af = c.freshName(TermName("af"))
     val fk = c.freshName(TermName("fk"))

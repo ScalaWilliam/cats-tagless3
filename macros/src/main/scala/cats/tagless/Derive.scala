@@ -24,24 +24,24 @@ import cats.{Apply, Bifunctor, Contravariant, FlatMap, Functor, Invariant, Semig
 object Derive {
 
   /** Derives an implementation of `Alg` where all abstract methods return a constant value. */
-  def const[Alg[_[_]], A](value: A): Alg[Const[A]#λ] = macro DeriveMacros.const[Alg, A]
+  def const[Alg[_[_]], A](value: A): Alg[Const[A]#λ] = ??? // macro DeriveMacros.const[Alg, A]
 
   /** Derives an implementation of `Alg` where all abstract methods return `Unit`. */
-  def void[Alg[_[_]]]: Alg[Void] = macro DeriveMacros.void[Alg]
+  def void[Alg[_[_]]]: Alg[Void] = ??? // macro DeriveMacros.void[Alg]
 
   /** Derives an implementation of `Alg` that forwards all calls to another one supplied via `ReaderT`. This enables a
     * form of dependency injection.
     */
-  def readerT[Alg[_[_]], F[_]]: Alg[ReaderT[F, Alg[F], *]] = macro DeriveMacros.readerT[Alg, F]
+  def readerT[Alg[_[_]], F[_]]: Alg[ReaderT[F, Alg[F], *]] = ??? // macro DeriveMacros.readerT[Alg, F]
 
-  def functor[F[_]]: Functor[F] = macro DeriveMacros.functor[F]
-  def contravariant[F[_]]: Contravariant[F] = macro DeriveMacros.contravariant[F]
-  def invariant[F[_]]: Invariant[F] = macro DeriveMacros.invariant[F]
-  def profunctor[F[_, _]]: Profunctor[F] = macro DeriveMacros.profunctor[F]
-  def bifunctor[F[_, _]]: Bifunctor[F] = macro DeriveMacros.bifunctor[F]
-  def semigroupal[F[_]]: Semigroupal[F] = macro DeriveMacros.semigroupal[F]
-  def apply[F[_]]: Apply[F] = macro DeriveMacros.apply[F]
-  def flatMap[F[_]]: FlatMap[F] = macro DeriveMacros.flatMap[F]
+  def functor[F[_]]: Functor[F] = ??? // macro DeriveMacros.functor[F]
+  def contravariant[F[_]]: Contravariant[F] = ??? // macro DeriveMacros.contravariant[F]
+  def invariant[F[_]]: Invariant[F] = ??? // macro DeriveMacros.invariant[F]
+  def profunctor[F[_, _]]: Profunctor[F] = ??? // macro DeriveMacros.profunctor[F]
+  def bifunctor[F[_, _]]: Bifunctor[F] = ??? // macro DeriveMacros.bifunctor[F]
+  def semigroupal[F[_]]: Semigroupal[F] = ??? // macro DeriveMacros.semigroupal[F]
+  def apply[F[_]]: Apply[F] = ??? // macro DeriveMacros.apply[F]
+  def flatMap[F[_]]: FlatMap[F] = ??? // macro DeriveMacros.flatMap[F]
 
   // format: off
   /** Generates a FunctorK instance.
@@ -64,19 +64,19 @@ object Derive {
     * }}}
     */
   // format: on
-  def functorK[Alg[_[_]]]: FunctorK[Alg] = macro DeriveMacros.functorK[Alg]
+  def functorK[Alg[_[_]]]: FunctorK[Alg] = ??? // macro DeriveMacros.functorK[Alg]
 
-  def contravariantK[Alg[_[_]]]: ContravariantK[Alg] = macro DeriveMacros.contravariantK[Alg]
-  def invariantK[Alg[_[_]]]: InvariantK[Alg] = macro DeriveMacros.invariantK[Alg]
-  def semigroupalK[Alg[_[_]]]: SemigroupalK[Alg] = macro DeriveMacros.semigroupalK[Alg]
-  def applyK[Alg[_[_]]]: ApplyK[Alg] = macro DeriveMacros.applyK[Alg]
+  def contravariantK[Alg[_[_]]]: ContravariantK[Alg] = ??? // macro DeriveMacros.contravariantK[Alg]
+  def invariantK[Alg[_[_]]]: InvariantK[Alg] = ??? // macro DeriveMacros.invariantK[Alg]
+  def semigroupalK[Alg[_[_]]]: SemigroupalK[Alg] = ??? // macro DeriveMacros.semigroupalK[Alg]
+  def applyK[Alg[_[_]]]: ApplyK[Alg] = ??? // macro DeriveMacros.applyK[Alg]
 
   /** Type class for instrumenting an algebra. Note: This feature is experimental, API is likely to change.
     */
-  def instrument[Alg[_[_]]]: Instrument[Alg] = macro DeriveMacros.instrument[Alg]
+  def instrument[Alg[_[_]]]: Instrument[Alg] = ??? // macro DeriveMacros.instrument[Alg]
 
   /** Type class supporting Aspect-Oriented Programming (AOP) for a tagless final algebra. Note: This feature is
     * experimental, API is likely to change.
     */
-  def aspect[Alg[_[_]], Dom[_], Cod[_]]: Aspect[Alg, Dom, Cod] = macro DeriveMacros.aspect[Alg, Dom, Cod]
+  def aspect[Alg[_[_]], Dom[_], Cod[_]]: Aspect[Alg, Dom, Cod] = ??? // macro DeriveMacros.aspect[Alg, Dom, Cod]
 }

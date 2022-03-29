@@ -37,7 +37,7 @@ private[tagless] class autoProductNKMacros(override val c: whitebox.Context) ext
     val range = 1 to arity
 
     // tparam"F1[_], F2[_], F3[_]"
-    val effectTypeParams: List[TypeDef] =
+    val effectTypeParams: _root_.scala.collection.immutable.List[TypeDef] =
       range.map(n => createTypeParam("F" + n, 1)).toList
     val effectTypeParamsNames = tArgs(effectTypeParams)
 
@@ -80,6 +80,6 @@ private[tagless] class autoProductNKMacros(override val c: whitebox.Context) ext
   def productKInst(annottees: c.Tree*): c.Tree =
     enrich(annottees.toList) { td =>
       val productMethods = (3 to 9).map(productMethod(td))
-      Seq(td.defn, addStats(td.companion, productMethods))
+      _root_.scala.collection.immutable.Seq(td.defn, addStats(td.companion, productMethods))
     }
 }

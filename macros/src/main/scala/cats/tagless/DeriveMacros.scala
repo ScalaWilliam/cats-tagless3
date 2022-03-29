@@ -282,473 +282,87 @@ class DeriveMacros(val c: blackbox.Context) {
       implement(algebra)(b)(types ++ methods)
   }
 
-  // def mapK[F[_], G[_]](af: A[F])(fk: F ~> G): A[G]
-  def mapK(algebra: Type): MethodDef = MethodDef("mapK") {
-    case PolyType(List(f, g), MethodType(List(af), MethodType(List(fk), _))) =>
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.occursInReturn(f) =>
-          method.transformSubst(af, f -> g) {
-            case Parameter(pn, pt, _) if occursIn(pt)(f) =>
-              val F = method.summon[ContravariantK[Any]](polyType(f :: Nil, pt))
-              q"$F.contramapK[$g, $f]($pn)($fk)"
-          } { case delegate =>
-            val F = method.summon[FunctorK[Any]](polyType(f :: Nil, method.returnType))
-            q"$F.mapK[$f, $g]($delegate)($fk)"
-          }
-      }
+//  def void[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    const[Alg, Unit](q"()")
 
-      implement(algebra)(g)(types ++ methods)
-  }
-
-  // def contramap[A, B](fa: F[A])(f: B => A): F[B]
-  def contramap(algebra: Type): MethodDef = MethodDef("contramap") {
-    case PolyType(List(a, b), MethodType(List(fa), MethodType(List(f), _))) =>
-      val Fa = singleType(NoPrefix, fa)
-      val members = overridableMembersOf(Fa)
-      val types = delegateAbstractTypes(Fa, members, Fa)
-      val methods = delegateMethods(Fa, members, fa) {
-        case method if method.occursInSignature(a) =>
-          method.transformSubst(fa, a -> b) {
-            case Parameter(pn, pt, _) if occursIn(pt)(a) =>
-              val F = method.summon[Functor[Any]](polyType(a :: Nil, pt))
-              q"$F.map[$b, $a]($pn)($f)"
-          } {
-            case delegate if method.occursInReturn(a) =>
-              val F = method.summon[Contravariant[Any]](polyType(a :: Nil, method.returnType))
-              q"$F.contramap[$a, $b]($delegate)($f)"
-          }
-      }
-
-      implement(algebra)(b)(types ++ methods)
-  }
-
-  // def contramapK[F, G](af: A[F])(fk: G => F): A[G]
-  def contramapK(algebra: Type): MethodDef = MethodDef("contramapK") {
-    case PolyType(List(f, g), MethodType(List(af), MethodType(List(fk), _))) =>
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.occursInSignature(f) =>
-          method.transformSubst(af, f -> g) {
-            case Parameter(pn, pt, _) if occursIn(pt)(f) =>
-              val F = method.summon[FunctorK[Any]](polyType(f :: Nil, pt))
-              q"$F.mapK[$g, $f]($pn)($fk)"
-          } {
-            case delegate if method.occursInReturn(f) =>
-              val F = method.summon[ContravariantK[Any]](polyType(f :: Nil, method.returnType))
-              q"$F.contramapK[$f, $g]($delegate)($fk)"
-          }
-      }
-
-      implement(algebra)(g)(types ++ methods)
-  }
-
-  // def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]
-  def imap(algebra: Type): MethodDef = MethodDef("imap") {
-    case PolyType(List(a, b), MethodType(List(fa), MethodType(List(f), MethodType(List(g), _)))) =>
-      val Fa = singleType(NoPrefix, fa)
-      val members = overridableMembersOf(Fa)
-      val types = delegateAbstractTypes(Fa, members, Fa)
-      val methods = delegateMethods(Fa, members, fa) {
-        case method if method.occursInSignature(a) =>
-          method.transformSubst(fa, a -> b) {
-            case Parameter(pn, pt, _) if occursIn(pt)(a) =>
-              val F = method.summon[Invariant[Any]](polyType(a :: Nil, pt))
-              q"$F.imap[$b, $a]($pn)($g)($f)"
-          } {
-            case delegate if method.occursInReturn(a) =>
-              val F = method.summon[Invariant[Any]](polyType(a :: Nil, method.returnType))
-              q"$F.imap[$a, $b]($delegate)($f)($g)"
-          }
-      }
-
-      implement(algebra)(b)(types ++ methods)
-  }
-
-  // def imapK[F[_], G[_]](af: A[F])(fk: F ~> G)(gK: G ~> F): A[G]
-  def imapK(algebra: Type): MethodDef = MethodDef("imapK") {
-    case PolyType(List(f, g), MethodType(List(af), MethodType(List(fk), MethodType(List(gk), _)))) =>
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.occursInSignature(f) =>
-          method.transformSubst(af, f -> g) {
-            case Parameter(pn, pt, _) if occursIn(pt)(f) =>
-              val F = method.summon[InvariantK[Any]](polyType(f :: Nil, pt))
-              q"$F.imapK[$g, $f]($pn)($gk)($fk)"
-          } {
-            case delegate if method.occursInReturn(f) =>
-              val F = method.summon[InvariantK[Any]](polyType(f :: Nil, method.returnType))
-              q"$F.imapK[$f, $g]($delegate)($fk)($gk)"
-          }
-      }
-
-      implement(algebra)(g)(types ++ methods)
-  }
-
-  // def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
-  def ap(algebra: Type): MethodDef = MethodDef("ap") {
-    case PolyType(List(a, b), MethodType(List(ff), MethodType(List(fa), _))) =>
-      val A = a.asType.toType
-      val B = b.asType.toType
-      val Fa = singleType(NoPrefix, fa)
-      val members = overridableMembersOf(Fa)
-      val types = delegateAbstractTypes(Fa, members, Fa)
-      val methods = delegateMethods(Fa, members, fa) {
-        case method if method.occursOnlyInReturn(a) =>
-          val returnType = method.returnType.map(t => if (t.typeSymbol == a) B else t)
-          val Ap = method.summon[cats.Apply[Any]](polyType(a :: Nil, method.returnType))
-          val body = q"$Ap.ap[$A, $B](${method.delegate(Ident(ff))})(${method.body})"
-          method.copy(returnType = returnType, body = body)
-        case method if method.occursInSignature(a) =>
-          abort(s"Type parameter $A occurs in contravariant position in method ${method.displayName}")
-      }
-
-      implement(algebra)(b)(types ++ methods)
-  }
-
-  // def product[A, B](fa F[A], fb: F[B]): F[(A, B)]
-  def product(algebra: Type): MethodDef = MethodDef("product") {
-    case PolyType(List(a, b), MethodType(List(fa, fb), _)) =>
-      val A = a.asType.toType
-      val B = b.asType.toType
-      val P = appliedType(symbolOf[(Any, Any)], A, B)
-      val Fa = singleType(NoPrefix, fa)
-      val members = overridableMembersOf(Fa)
-      val types = delegateAbstractTypes(Fa, members, Fa)
-      val methods = delegateMethods(Fa, members, fa) {
-        case method if method.occursOnlyInReturn(a) =>
-          val returnType = method.returnType.map(t => if (t.typeSymbol == a) P else t)
-          val Sg = method.summon[Semigroupal[Any]](polyType(a :: Nil, method.returnType))
-          val body = q"$Sg.product[$A, $B](${method.body}, ${method.delegate(Ident(fb))})"
-          method.copy(returnType = returnType, body = body)
-        case method if method.occursInSignature(a) =>
-          abort(s"Type parameter $A occurs in contravariant position in method ${method.displayName}")
-      }
-
-      implement(appliedType(algebra, P))()(types ++ methods)
-  }
-
-  // def productK[F[_], G[_]](af: A[F], ag: A[G]): A[Tuple2K[F, G, *]]
-  def productK(algebra: Type): MethodDef = MethodDef("productK") {
-    case PolyType(List(f, g), MethodType(List(af, ag), _)) =>
-      val Tuple2K = symbolOf[Tuple2K[Any, Any, Any]]
-      val SemiK = typeOf[SemigroupalK.type].termSymbol
-      val F = f.asType.toTypeConstructor
-      val G = g.asType.toTypeConstructor
-      val t2k = polyType(F.typeParams, appliedType(Tuple2K, F :: G :: F.typeParams.map(_.asType.toType)))
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val transformType: PartialFunction[Type, Type] = {
-        case tpe if occursIn(tpe)(f) =>
-          tpe.map(t => if (t.typeSymbol == f) appliedType(t2k, t.typeArgs) else t)
-      }
-
-      val firstK = q"$SemiK.firstK[$F, $G]"
-      val secondK = q"$SemiK.secondK[$F, $G]"
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.occursInSignature(f) =>
-          def transformParam(fk: Tree): PartialFunction[Parameter, Tree] = {
-            case Parameter(pn, pt, _) if occursIn(pt)(f) =>
-              val Fk = method.summon[FunctorK[Any]](polyType(f :: Nil, pt))
-              q"$Fk.mapK($pn)($fk)"
-          }
-
-          val mf = method.transform(q"$af")(transformType)(transformParam(firstK))()
-          if (method.occursInReturn(f)) {
-            val mg = method.transform(q"$ag")(transformType)(transformParam(secondK))()
-            val Sk = method.summon[SemigroupalK[Any]](polyType(f :: Nil, method.returnType))
-            mf.copy(body = q"$Sk.productK[$F, $G](${mf.body}, ${mg.body})")
-          } else mf
-      }
-
-      val typeParams = Tuple2K.typeParams.drop(2)
-      val typeArgs = F :: G :: typeParams.map(_.asType.toType)
-      val Tuple2kAlg = appliedType(algebra, polyType(typeParams, appliedType(Tuple2K, typeArgs)))
-      implement(Tuple2kAlg)()(types ++ methods)
-  }
-
-  // def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
-  def flatMap_(algebra: Type): MethodDef = MethodDef("flatMap") {
-    case PolyType(List(a, b), MethodType(List(fa), MethodType(List(f), _))) =>
-      val Fa = singleType(NoPrefix, fa)
-      val members = overridableMembersOf(Fa)
-      val types = delegateAbstractTypes(Fa, members, Fa)
-      val methods = delegateMethods(Fa, members, fa) {
-        case method if method.returnType.typeSymbol == a =>
-          val body = method.delegate(q"$f(${method.body})")
-          method.copy(returnType = b.asType.toType, body = body)
-        case method if method.occursInSignature(a) =>
-          val A = a.asType.toType
-          abort(s"Type parameter $A can only occur as a top level return type in method ${method.displayName}")
-      }
-
-      implement(algebra)(b)(types ++ methods)
-  }
-
-  // def tailRecM[A, B](x: A)(f: A => F[Either[A, B]]): F[B]
-  def tailRecM(algebra: Type): MethodDef = MethodDef("tailRecM") {
-    case PolyType(List(a, b), MethodType(List(x), MethodType(List(f), _))) =>
-      val Fa = appliedType(algebra, a.asType.toType)
-      val methods = delegateMethods(Fa, overridableMembersOf(Fa), NoSymbol) {
-        case method if method.returnType.typeSymbol == a =>
-          val step = c.freshName(TermName("step"))
-          val current = c.freshName(TermName("current"))
-          val body = q"""{
-            @_root_.scala.annotation.tailrec def $step($current: $a): $b =
-              ${method.delegate(q"$f($current)")} match {
-                case _root_.scala.Left(next) => $step(next)
-                case _root_.scala.Right(target) => target
-              }
-
-            $step($x)
-          }"""
-
-          method.copy(returnType = b.asType.toType, body = body)
-        case method if method.occursInSignature(a) =>
-          val A = a.asType.toType
-          abort(s"Type parameter $A can only occur as a top level return type in method ${method.displayName}")
-        case method =>
-          method.copy(body = method.delegate(q"$f($x)"))
-      }
-
-      implement(algebra)(b)(methods)
-  }
-
-  // def dimap[A, B, C, D](fab: F[A, B])(f: C => A)(g: B => D): F[C, D]
-  def dimap(algebra: Type): MethodDef = MethodDef("dimap") {
-    case PolyType(List(a, b, c, d), MethodType(List(fab), MethodType(List(f), MethodType(List(g), _)))) =>
-      val Fab = singleType(NoPrefix, fab)
-      val members = overridableMembersOf(Fab)
-      val types = delegateAbstractTypes(Fab, members, Fab)
-      val methods = delegateMethods(Fab, members, fab) {
-        case method if method.occursInSignature(a) || method.occursInSignature(b) =>
-          method.transformSubst(fab, a -> c, b -> d) {
-            case Parameter(pn, pt, _) if occursIn(pt)(a) && occursIn(pt)(b) =>
-              val F = method.summon[Profunctor[Any]](polyType(b :: a :: Nil, pt))
-              q"$F.dimap[$d, $c, $b, $a]($pn)($g)($f)"
-            case Parameter(pn, pt, _) if occursIn(pt)(a) =>
-              val F = method.summon[Functor[Any]](polyType(a :: Nil, pt))
-              q"$F.map[$c, $a]($pn)($f)"
-            case Parameter(pn, pt, _) if occursIn(pt)(b) =>
-              val F = method.summon[Contravariant[Any]](polyType(b :: Nil, pt))
-              q"$F.contramap[$d, $b]($pn)($g)"
-          } {
-            case delegate if method.occursInReturn(a) && method.occursInReturn(b) =>
-              val F = method.summon[Profunctor[Any]](polyType(a :: b :: Nil, method.returnType))
-              q"$F.dimap[$a, $b, $c, $d]($delegate)($f)($g)"
-            case delegate if method.occursInReturn(a) =>
-              val F = method.summon[Contravariant[Any]](polyType(a :: Nil, method.returnType))
-              q"$F.contramap[$a, $c]($delegate)($f)"
-            case delegate if method.occursInReturn(b) =>
-              val F = method.summon[Functor[Any]](polyType(b :: Nil, method.returnType))
-              q"$F.map[$b, $d]($delegate)($g)"
-          }
-      }
-
-      implement(algebra)(c, d)(types ++ methods)
-  }
-
-  // def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D]
-  def bimap(algebra: Type): MethodDef = MethodDef("bimap") {
-    case PolyType(List(a, b, c, d), MethodType(List(fab), MethodType(List(f, g), _))) =>
-      val Fab = singleType(NoPrefix, fab)
-      val members = overridableMembersOf(Fab)
-      val types = delegateAbstractTypes(Fab, members, Fab)
-      val methods = delegateMethods(Fab, members, fab) {
-        case method if method.occursInSignature(a) || method.occursInSignature(b) =>
-          method.transformSubst(fab, a -> c, b -> d) {
-            case Parameter(_, pt, _) if occursIn(pt)(a) && occursIn(pt)(b) =>
-              val A = a.asType.toType
-              val B = b.asType.toType
-              abort(s"Both type parameters $A and $B occur in contravariant position in method ${method.displayName}")
-            case Parameter(pn, pt, _) if occursIn(pt)(a) =>
-              val F = method.summon[Contravariant[Any]](polyType(a :: Nil, pt))
-              q"$F.contramap[$c, $a]($pn)($f)"
-            case Parameter(pn, pt, _) if occursIn(pt)(b) =>
-              val F = method.summon[Contravariant[Any]](polyType(b :: Nil, pt))
-              q"$F.contramap[$d, $b]($pn)($g)"
-          } {
-            case delegate if method.occursInReturn(a) && method.occursInReturn(b) =>
-              val F = method.summon[Bifunctor[Any]](polyType(a :: b :: Nil, method.returnType))
-              q"$F.bimap[$a, $b, $c, $d]($delegate)($f, $g)"
-            case delegate if method.occursInReturn(a) =>
-              val F = method.summon[Functor[Any]](polyType(a :: Nil, method.returnType))
-              q"$F.map[$a, $c]($delegate)($f)"
-            case delegate if method.occursInReturn(b) =>
-              val F = method.summon[Functor[Any]](polyType(b :: Nil, method.returnType))
-              q"$F.map[$b, $d]($delegate)($g)"
-          }
-      }
-
-      implement(algebra)(c, d)(types ++ methods)
-  }
-
-  // def instrument[F[_]](af: Alg[F]): Alg[Instrumentation[F, *]]
-  def instrumentation(algebra: Type): MethodDef = MethodDef("instrument") {
-    case PolyType(List(f), MethodType(List(af), _)) =>
-      val Instrumentation = symbolOf[Instrumentation[Any, Any]]
-      val F = f.asType.toTypeConstructor
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val algebraName = algebra.typeSymbol.name.decodedName.toString
-
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.returnType.typeSymbol == f =>
-          val body = q"${reify(aop.Instrumentation)}(${method.body}, $algebraName, ${method.displayName})"
-          val returnType = appliedType(Instrumentation, F :: method.returnType.typeArgs)
-          method.copy(body = body, returnType = returnType)
-        case method if method.occursInSignature(f) =>
-          abort(s"Type parameter $F can only occur as a top level return type in method ${method.displayName}")
-      }
-
-      val InstrumentationType = appliedType(Instrumentation, F :: F.typeParams.map(_.asType.toType))
-      val InstrumentedAlg = appliedType(algebra, polyType(F.typeParams, InstrumentationType))
-      implement(InstrumentedAlg)()(types ++ methods)
-  }
-
-  // def weave[F[_]](af: Alg[F]): Alg[Aspect.Weave[F, Dom, Cod, *]]
-  def weave(Dom: Type, Cod: Type)(algebra: Type): MethodDef = MethodDef("weave") {
-    case PolyType(List(f), MethodType(List(af), _)) =>
-      val AspectWeave = symbolOf[Aspect.Weave[Any, Any, Any, Any]]
-      val F = f.asType.toTypeConstructor
-      val Af = singleType(NoPrefix, af)
-      val members = overridableMembersOf(Af)
-      val types = delegateAbstractTypes(Af, members, Af)
-      val algebraName = algebra.typeSymbol.name.decodedName.toString
-
-      val methods = delegateMethods(Af, members, af) {
-        case method if method.returnType.typeSymbol == f =>
-          val AspectAdvice = reify(Aspect.Advice)
-          val arguments = method.transformedArgLists { case param @ Parameter(pn, pt, pm) =>
-            val constructor = TermName(if (pm.hasFlag(Flag.BYNAMEPARAM)) "byName" else "byValue")
-            q"$AspectAdvice.$constructor[$Dom, $pt](${param.displayName}, $pn)"
-          }
-
-          val hasImplicits = method.signature.paramLists.lastOption.flatMap(_.headOption).exists(_.isImplicit)
-          val domain = if (hasImplicits) arguments.dropRight(1) else arguments
-          val typeArgs = method.returnType.typeArgs
-          val codomain = q"$AspectAdvice[$F, $Cod, ..$typeArgs](${method.displayName}, ${method.body})"
-          val body = q"${reify(Aspect.Weave)}[$F, $Dom, $Cod, ..$typeArgs]($algebraName, $domain, $codomain)"
-          val returnType = appliedType(AspectWeave, F :: Dom :: Cod :: typeArgs)
-          method.copy(body = body, returnType = returnType)
-        case method if method.occursInSignature(f) =>
-          abort(s"Type parameter $F can only occur as a top level return type in method ${method.displayName}")
-      }
-
-      val WeaveType = appliedType(AspectWeave, F :: Dom :: Cod :: F.typeParams.map(_.asType.toType))
-      val WeavedAlg = appliedType(algebra, polyType(F.typeParams, WeaveType))
-      implement(WeavedAlg)()(types ++ methods)
-  }
-
-  def const[Alg[_[_]], A](value: Tree)(implicit tag: WeakTypeTag[Alg[Any]], a: WeakTypeTag[A]): Tree = {
-    val algebra = typeConstructorOf(tag)
-    val f = algebra.typeParams.head
-    val F = f.asType.toTypeConstructor
-    val Af = appliedType(algebra, F)
-    val tmp = c.freshName(TermName("value"))
-    val abstractMembers = overridableMembersOf(Af).filter(_.isAbstract)
-    val methods = delegateMethods(Af, abstractMembers, NoSymbol) {
-      case method if method.returnType.typeSymbol == f =>
-        method.copy(returnType = a.tpe, body = q"$tmp")
-      case method if method.occursInSignature(f) =>
-        abort(s"Type parameter $F can only occur as a top level return type in method ${method.displayName}")
-      case method =>
-        abort(s"Abstract method ${method.displayName} cannot be derived because it does not return in $F")
-    }
-
-    val Const = weakTypeOf[Const[A]].member(TypeName("λ")).typeSignature
-    q"val $tmp = $value; ${implement(appliedType(algebra, Const))()(methods)}"
-  }
-
-  def void[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    const[Alg, Unit](q"()")
-
-  def readerT[Alg[_[_]], F[_]](implicit tag: WeakTypeTag[Alg[Any]], fTag: WeakTypeTag[F[Any]]): Tree = {
-    val algebra = typeConstructorOf(tag)
-    val F = typeConstructorOf(fTag)
-    val f = F.typeSymbol
-    val Af = appliedType(algebra, F)
-    val af = c.freshName(TermName("af"))
-    val ReaderT = typeOf[ReaderT[Any, Any, Any]].typeConstructor
-    val abstractMembers = overridableMembersOf(Af).filter(_.isAbstract)
-    val methods = delegateMethods(Af, abstractMembers, NoSymbol) {
-      case method if method.returnType.typeSymbol == f =>
-        method.transform(q"$af") {
-          case tpe if tpe.typeSymbol == f =>
-            appliedType(ReaderT, F :: Af :: tpe.typeArgs)
-        } {
-          case Parameter(pn, pt, _) if pt.typeSymbol == f =>
-            q"$pn.run($af)"
-        } { case delegate =>
-          val typeArgs = F :: Af :: method.returnType.typeArgs
-          q"${reify(cats.data.ReaderT)}[..$typeArgs](($af: $Af) => $delegate)"
-        }
-      case method =>
-        abort(s"Abstract method ${method.displayName} cannot be derived because it does not return in $F")
-    }
-
-    val b = ReaderT.typeParams.last.asType
-    val typeArg = polyType(b :: Nil, appliedType(ReaderT, F, Af, b.toType))
-    implement(appliedType(algebra, typeArg))()(methods)
-  }
-
-  def functor[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[Functor[F]](tag)(map)
-
-  def contravariant[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[Contravariant[F]](tag)(contramap)
-
-  def invariant[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[Invariant[F]](tag)(imap)
-
-  def profunctor[F[_, _]](implicit tag: WeakTypeTag[F[Any, Any]]): Tree =
-    instantiate[Profunctor[F]](tag)(dimap)
-
-  def bifunctor[F[_, _]](implicit tag: WeakTypeTag[F[Any, Any]]): Tree =
-    instantiate[Bifunctor[F]](tag)(bimap)
-
-  def semigroupal[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[Semigroupal[F]](tag)(product)
-
-  def apply[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[cats.Apply[F]](tag)(map, ap)
-
-  def flatMap[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
-    instantiate[FlatMap[F]](tag)(map, flatMap_, tailRecM)
-
-  def functorK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[FunctorK[Alg]](tag)(mapK)
-
-  def contravariantK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[ContravariantK[Alg]](tag)(contramapK)
-
-  def invariantK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[InvariantK[Alg]](tag)(imapK)
-
-  def semigroupalK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[SemigroupalK[Alg]](tag)(productK)
-
-  def applyK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[ApplyK[Alg]](tag)(mapK, productK)
-
-  def instrument[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[Instrument[Alg]](tag)(instrumentation, mapK)
-
-  def aspect[Alg[_[_]], Dom[_], Cod[_]](implicit
-      tag: WeakTypeTag[Alg[Any]],
-      dom: WeakTypeTag[Dom[Any]],
-      cod: WeakTypeTag[Cod[Any]]
-  ): Tree = {
-    val Dom = typeConstructorOf(dom)
-    val Cod = typeConstructorOf(cod)
-    instantiate[Aspect[Alg, Dom, Cod]](tag, Dom, Cod)(weave(Dom, Cod), mapK)
-  }
+//  def readerT[Alg[_[_]], F[_]](implicit tag: WeakTypeTag[Alg[Any]], fTag: WeakTypeTag[F[Any]]): Tree = {
+//    val algebra = typeConstructorOf(tag)
+//    val F = typeConstructorOf(fTag)
+//    val f = F.typeSymbol
+//    val Af = appliedType(algebra, F)
+//    val af = c.freshName(TermName("af"))
+//    val ReaderT = typeOf[ReaderT[Any, Any, Any]].typeConstructor
+//    val abstractMembers = overridableMembersOf(Af).filter(_.isAbstract)
+//    val methods = delegateMethods(Af, abstractMembers, NoSymbol) {
+//      case method if method.returnType.typeSymbol == f =>
+//        method.transform(q"$af") {
+//          case tpe if tpe.typeSymbol == f =>
+//            appliedType(ReaderT, F :: Af :: tpe.typeArgs)
+//        } {
+//          case Parameter(pn, pt, _) if pt.typeSymbol == f =>
+//            q"$pn.run($af)"
+//        } { case delegate =>
+//          val typeArgs = F :: Af :: method.returnType.typeArgs
+//          q"${reify(cats.data.ReaderT)}[..$typeArgs](($af: $Af) => $delegate)"
+//        }
+//      case method =>
+//        abort(s"Abstract method ${method.displayName} cannot be derived because it does not return in $F")
+//    }
+//
+//    val b = ReaderT.typeParams.last.asType
+//    val typeArg = polyType(b :: Nil, appliedType(ReaderT, F, Af, b.toType))
+//    implement(appliedType(algebra, typeArg))()(methods)
+//  }
+//
+//  def functor[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[Functor[F]](tag)(map)
+//
+//  def contravariant[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[Contravariant[F]](tag)(contramap)
+//
+//  def invariant[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[Invariant[F]](tag)(imap)
+//
+//  def profunctor[F[_, _]](implicit tag: WeakTypeTag[F[Any, Any]]): Tree =
+//    instantiate[Profunctor[F]](tag)(dimap)
+//
+//  def bifunctor[F[_, _]](implicit tag: WeakTypeTag[F[Any, Any]]): Tree =
+//    instantiate[Bifunctor[F]](tag)(bimap)
+//
+//  def semigroupal[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[Semigroupal[F]](tag)(product)
+//
+//  def apply[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[cats.Apply[F]](tag)(map, ap)
+//
+//  def flatMap[F[_]](implicit tag: WeakTypeTag[F[Any]]): Tree =
+//    instantiate[FlatMap[F]](tag)(map, flatMap_, tailRecM)
+//
+//  def functorK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[FunctorK[Alg]](tag)(mapK)
+//
+//  def contravariantK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[ContravariantK[Alg]](tag)(contramapK)
+//
+//  def invariantK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[InvariantK[Alg]](tag)(imapK)
+//
+//  def semigroupalK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[SemigroupalK[Alg]](tag)(productK)
+//
+//  def applyK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[ApplyK[Alg]](tag)(mapK, productK)
+//
+//  def instrument[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
+//    instantiate[Instrument[Alg]](tag)(instrumentation, mapK)
+//
+//  def aspect[Alg[_[_]], Dom[_], Cod[_]](implicit
+//      tag: WeakTypeTag[Alg[Any]],
+//      dom: WeakTypeTag[Dom[Any]],
+//      cod: WeakTypeTag[Cod[Any]]
+//  ): Tree = {
+//    val Dom = typeConstructorOf(dom)
+//    val Cod = typeConstructorOf(cod)
+//    instantiate[Aspect[Alg, Dom, Cod]](tag, Dom, Cod)(weave(Dom, Cod), mapK)
+//  }
 }
